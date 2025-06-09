@@ -5,20 +5,29 @@ local Window = Rayfield:CreateWindow({
   LoadingTitle = "Loading Scripts",
   LoadingSubtitle = "By Thanawat",
   ConfigurationSaving = {
-      Enabled = false
+    Enabled = false
   },
   Discord = {
-      Enabled = false
+    Enabled = false
   },
   KeySystem = false
 })
 
 local MainTab = Window:CreateTab("ESP", 4483362458)
+local FarmTab = Window:CreateTab("Farm", 4483362458)
 
 local espPlayerEnabled = false
 local espAnimalEnabled = false
+local showAnimalName = true
+local showAnimalHP = false
+local showAnimalDistance = false
 local playerESPColor = Color3.fromRGB(0, 120, 255)
 local animalESPColor = Color3.fromRGB(255, 128, 128)
+
+local ignoreAnimalNames = {
+  ["Horse"] = true,
+  ["Cow"] = true
+}
 
 MainTab:Set("ESP", 4483362458, Color3.fromRGB(255, 255, 255), false)
 MainTab:CreateToggle({
@@ -35,22 +44,102 @@ MainTab:CreateColorPicker({
     playerESPColor = color
   end,
 })
-MainTab:CreateToggle({
+FarmTab:CreateToggle({
   Name = "ESP Animals",
   CurrentValue = false,
   Callback = function(Value)
     espAnimalEnabled = Value
   end,
 })
-MainTab:CreateColorPicker({
+FarmTab:CreateColorPicker({
   Name = "Animal ESP Color",
   Color = animalESPColor,
   Callback = function(color)
     animalESPColor = color
   end,
 })
+FarmTab:CreateToggle({
+  Name = "Show Animal Name",
+  CurrentValue = true,
+  Callback = function(Value)
+    showAnimalName = Value
+  end,
+})
+FarmTab:CreateToggle({
+  Name = "Show Animal HP",
+  CurrentValue = false,
+  Callback = function(Value)
+    showAnimalHP = Value
+  end,
+})
+FarmTab:CreateToggle({
+  Name = "Show Animal Distance",
+  CurrentValue = false,
+  Callback = function(Value)
+    showAnimalDistance = Value
+  end,
+})
 
--- Main Script Functions
+-- ====== ESP Utility ======
+local function createBillboard(obj)
+  local gui = Instance.new("BillboardGui")
+  gui.Name = "ESP_Board"
+  gui.Size = UDim2.new(0, 200, 0, 50)
+  gui.Adornee = obj
+  gui.AlwaysOnTop = true
+  gui.StudsOffset = Vector3.new(0, 4, 0)
+
+  local label = Instance.new("TextLabel")
+  label.Name = "InfoLabel"
+  label.Size = UDim2.new(1, 0, 1, 0)
+  label.BackgroundTransparency = 1
+  label.TextColor3 = animalESPColor
+  label.TextStrokeTransparency = 0.5
+  label.Font = Enum.Font.SourceSansBold
+  label.TextScaled = true
+  label.Parent = gui
+
+  gui.Parent = obj
+end
+
+local function updateBillboard(obj)
+  local gui = obj:FindFirstChild("ESP_Board")
+  if not gui then
+    createBillboard(obj)
+    gui = obj:FindFirstChild("ESP_Board")
+  end
+
+  local label = gui and gui:FindFirstChild("InfoLabel")
+  if label then
+    local text = ""
+
+    if showAnimalName then
+      text = text .. obj.Name
+    end
+
+    if showAnimalHP and obj:FindFirstChild("Humanoid") then
+      local hp = math.floor(obj.Humanoid.Health)
+      text = text .. (text ~= "" and " | " or "") .. "HP: " .. hp
+    end
+
+    if showAnimalDistance and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and obj:FindFirstChild("HumanoidRootPart") then
+      local dist = (obj.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+      text = text .. (text ~= "" and " | " or "") .. "Dist: " .. math.floor(dist) .. "m"
+    end
+
+    label.Text = text
+    label.TextColor3 = animalESPColor
+  end
+end
+
+local function removeBillboard(obj)
+  local b = obj:FindFirstChild("ESP_Board")
+  if b then
+    b:Destroy()
+  end
+end
+
+-- ====== ESP Highlight ======
 local function highlightObject(obj, tagName, color)
   if not obj:FindFirstChild("Highlight_" .. tagName) then
     local hl = Instance.new("Highlight")
@@ -71,6 +160,7 @@ local function removeHighlight(obj, tagName)
   if h then h:Destroy() end
 end
 
+-- ====== ESP Player ======
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
@@ -84,6 +174,7 @@ Players.PlayerAdded:Connect(function(player)
   end)
 end)
 
+-- ====== ESP Render Loop ======
 RunService.Heartbeat:Connect(function()
   local playerFolder = workspace:FindFirstChild("WORKSPACE_Entities") and workspace.WORKSPACE_Entities:FindFirstChild("Players")
   if playerFolder then
@@ -98,14 +189,22 @@ RunService.Heartbeat:Connect(function()
     end
   end
 
+  -- ====== ESP Animal ======
   local animalFolder = workspace:FindFirstChild("WORKSPACE_Entities") and workspace.WORKSPACE_Entities:FindFirstChild("Animals")
   if animalFolder then
     for _, animal in ipairs(animalFolder:GetChildren()) do
       if animal:IsA("Model") and animal:FindFirstChild("HumanoidRootPart") then
-        if espAnimalEnabled then
-          highlightObject(animal, "Animal", animalESPColor)
+        if not ignoreAnimalNames[animal.Name] then
+          if espAnimalEnabled then
+            highlightObject(animal, "Animal", animalESPColor)
+            updateBillboard(animal)
+          else
+            removeHighlight(animal, "Animal")
+            removeBillboard(animal)
+          end
         else
           removeHighlight(animal, "Animal")
+          removeBillboard(animal)
         end
       end
     end
