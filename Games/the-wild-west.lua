@@ -8,14 +8,16 @@ local ignoreAnimalNames = {
 
 local Window = Rayfield:CreateWindow({
   Name = "The Wild West 4.0",
-  LoadingTitle = "Loading Scripts",
+  LoadingTitle = "Loading...",
   LoadingSubtitle = "By Thanawat",
+
   ConfigurationSaving = { Enabled = false },
   Discord = { Enabled = false },
   KeySystem = false
 })
 
 local MainTab = Window:CreateTab("Main", 4483362458)
+local Section = MainTab:CreateSection("Main")
 local PlayerTab = Window:CreateTab("PVP", 4483362458)
 local FarmTab = Window:CreateTab("Farm", 4483362458)
 
@@ -57,38 +59,69 @@ MainTab:CreateToggle({
   end
 })
 
+-- MainTab:CreateToggle({
+--   Name = "Infinite Stamina",
+--   CurrentValue = false,
+--   Callback = function(value)
+--     local OldNameCall
+--     OldNameCall = hookmetamethod(game, "__namecall", function (...)
+--       local Args = {...}
+--       local self = Args[1]
+--       local Method = getnamecallmethod()
+--       if Method == "FireServer" and tostring(self) == "LowerStamina" and value then
+--         return task.wait(9e9)
+--       end
+--       return OldNameCall(...)
+--     end)
+--   end
+-- })
+
+-- MainTab:CreateToggle({
+--   Name = "No Fall Damage",
+--   CurrentValue = false,
+--   Callback = function(value)
+--     local oldNameCall
+--     oldNameCall = hookmetamethod(game, "__namecall", function (...)
+--       local args = {...}
+--       local self = args[1]
+--       if getnamecallmethod() == "FireServer" and tostring(self) == "DamageSelf" and value then
+--         return
+--       end
+--       return oldNameCall(...)
+--     end)
+--   end
+-- })
+
 MainTab:CreateToggle({
-  Name = "Infinite Stamina",
+  Name = "Auto Sprint",
   CurrentValue = false,
-  Callback = function(value)
-    local OldNameCall
-    OldNameCall = hookmetamethod(game, "__namecall", function (...)
-      local Args = {...}
-      local self = Args[1]
-      local Method = getnamecallmethod()
-      if Method == "FireServer" and tostring(self) == "LowerStamina" and value then
-        return task.wait(9e9)
+  Callback = function(value) 
+    game:GetService("RunService").Stepped:Connect(function()
+      if value then
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 25
+      else
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
       end
-      return OldNameCall(...)
     end)
   end
 })
 
-MainTab:CreateToggle({
-  Name = "No Fall Damage",
+PlayerTab:CreateToggle({
+  Name = "Instant reload",
   CurrentValue = false,
-  Callback = function(value)
-    local oldNameCall
-    oldNameCall = hookmetamethod(game, "__namecall", function (...)
-      local args = {...}
-      local self = args[1]
-      if getnamecallmethod() == "FireServer" and tostring(self) == "DamageSelf" and value then
-        return
-      end
-      return oldNameCall(...)
-    end)
-  end
+  Callback = function(Value)
+    for i, v in pairs(getgc(true)) do
+        if type(v) == "table" and rawget(v, "BaseRecoil")  then
+          if value then
+            v.ReloadSpeed = 1000
+            v.LoadSpeed = 1000
+            v.LoadEndSpeed = 1000
+          end
+        end
+    end
+  end,
 })
+
 
 PlayerTab:CreateToggle({
   Name = "ESP Players",
@@ -280,3 +313,6 @@ RunService.Heartbeat:Connect(function()
   processPlayers()
   processAnimals()
 end)
+
+
+Rayfield:LoadConfiguration()

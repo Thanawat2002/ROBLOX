@@ -120,36 +120,36 @@ local fb = Display.Toggle({
 local playerSection = WildWestHax.New({
      Title = "Player"
 })
-playerSection.Toggle({
-     Text = "Infinite Stamina",
-     Callback = function (value)
-          local OldNameCall
-          OldNameCall = hookmetamethod(game, "__namecall", function (...)
-               local Args = {...}
-               local self = Args[1]
-               local Method = getnamecallmethod()
-               if Method == "FireServer" and tostring(self) == "LowerStamina" and value then
-                    return task.wait(9e9)
-               end
-               return OldNameCall(...)
-          end)
-     end
-})
+-- playerSection.Toggle({
+--      Text = "Infinite Stamina",
+--      Callback = function (value)
+--           local OldNameCall
+--           OldNameCall = hookmetamethod(game, "__namecall", function (...)
+--                local Args = {...}
+--                local self = Args[1]
+--                local Method = getnamecallmethod()
+--                if Method == "FireServer" and tostring(self) == "LowerStamina" and value then
+--                     return task.wait(9e9)
+--                end
+--                return OldNameCall(...)
+--           end)
+--      end
+-- })
 
-playerSection.Toggle({
-     Text = "No fall damage",
-     Callback = function (value)
-          local oldNameCall
-          oldNameCall = hookmetamethod(game, "__namecall", function (...)
-               local args = {...}
-               local self = args[1]
-               if getnamecallmethod() == "FireServer" and tostring(self) == "DamageSelf" and value then
-                    return
-               end
-               return oldNameCall(...)
-          end)
-     end
-})
+-- playerSection.Toggle({
+--      Text = "No fall damage",
+--      Callback = function (value)
+--           local oldNameCall
+--           oldNameCall = hookmetamethod(game, "__namecall", function (...)
+--                local args = {...}
+--                local self = args[1]
+--                if getnamecallmethod() == "FireServer" and tostring(self) == "DamageSelf" and value then
+--                     return
+--                end
+--                return oldNameCall(...)
+--           end)
+--      end
+-- })
 
 playerSection.Toggle({
   Text = "Instant reload",
