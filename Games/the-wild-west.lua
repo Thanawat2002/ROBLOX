@@ -107,12 +107,12 @@ MainTab:CreateToggle({
 })
 
 PlayerTab:CreateToggle({
-  Name = "Instant reload",
+  Name = "Fast reload",
   CurrentValue = false,
   Callback = function(Value)
     for i, v in pairs(getgc(true)) do
         if type(v) == "table" and rawget(v, "BaseRecoil")  then
-          if value then
+          if Value then
             v.ReloadSpeed = 1000
             v.LoadSpeed = 1000
             v.LoadEndSpeed = 1000
