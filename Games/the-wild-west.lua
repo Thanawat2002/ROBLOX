@@ -1,18 +1,18 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local ignoreAnimalNames = {
-    ["Horse"] = true,
-    ["WendigoHorse"] = true,
-    ["Cow"] = true
+  ["Horse"] = true,
+  ["WendigoHorse"] = true,
+  ["Cow"] = true
 }
 
 local Window = Rayfield:CreateWindow({
-    Name = "The Wild West 4.0",
-    LoadingTitle = "Loading Scripts",
-    LoadingSubtitle = "By Thanawat",
-    ConfigurationSaving = { Enabled = false },
-    Discord = { Enabled = false },
-    KeySystem = false
+  Name = "The Wild West 4.0",
+  LoadingTitle = "Loading Scripts",
+  LoadingSubtitle = "By Thanawat",
+  ConfigurationSaving = { Enabled = false },
+  Discord = { Enabled = false },
+  KeySystem = false
 })
 
 local MainTab = Window:CreateTab("Main", 4483362458)
@@ -28,77 +28,66 @@ local showAnimalDistance = false
 local playerESPColor = Color3.fromRGB(0, 120, 255)
 local animalESPColor = Color3.fromRGB(255, 128, 128)
 
-local lightingSettings = {
-    FogEnd = 100000,
-    FogStart = 0,
-    ClockTime = 14,
-    Brightness = 5,
-    GlobalShadows = false
-}
-
 local Lighting = game:GetService("Lighting")
 
-local function applyLightingSettings()
-    Lighting.FogEnd = lightingSettings.FogEnd
-    Lighting.FogStart = lightingSettings.FogStart
-    Lighting.ClockTime = lightingSettings.ClockTime
-    Lighting.Brightness = lightingSettings.Brightness
-    Lighting.GlobalShadows = lightingSettings.GlobalShadows
-end
-
-applyLightingSettings()
-
-MainTab:CreateSlider({
-    Name = "FogEnd",
-    Range = {0, 200000},
-    Increment = 1000,
-    CurrentValue = lightingSettings.FogEnd,
-    Callback = function(Value)
-        lightingSettings.FogEnd = Value
-        applyLightingSettings()
-    end,
-})
-
-MainTab:CreateSlider({
-    Name = "FogStart",
-    Range = {0, 10000},
-    Increment = 100,
-    CurrentValue = lightingSettings.FogStart,
-    Callback = function(Value)
-        lightingSettings.FogStart = Value
-        applyLightingSettings()
-    end,
-})
-
-MainTab:CreateSlider({
-    Name = "ClockTime",
-    Range = {0, 24},
-    Increment = 0.1,
-    CurrentValue = lightingSettings.ClockTime,
-    Callback = function(Value)
-        lightingSettings.ClockTime = Value
-        applyLightingSettings()
-    end,
-})
-
-MainTab:CreateSlider({
-    Name = "Brightness",
-    Range = {0, 10},
-    Increment = 0.1,
-    CurrentValue = lightingSettings.Brightness,
-    Callback = function(Value)
-        lightingSettings.Brightness = Value
-        applyLightingSettings()
-    end,
+MainTab:CreateToggle({
+  Name = "Fullbright",
+  CurrentValue = false,
+  Callback = function(value)
+    if value then
+      Lighting.Ambient = Color3.new(1, 1, 1)
+      Lighting.ColorShift_Bottom = Color3.new(1, 1, 1)
+      Lighting.ColorShift_Top = Color3.new(1, 1, 1)
+    else
+      Lighting.Ambient = Color3.new(0, 0, 0)
+      Lighting.ColorShift_Bottom = Color3.new(0, 0, 0)
+      Lighting.ColorShift_Top = Color3.new(0, 0, 0)
+    end
+    Lighting.Changed:Connect(function()
+      if value then
+        Lighting.Ambient = Color3.new(1, 1, 1)
+        Lighting.ColorShift_Bottom = Color3.new(1, 1, 1)
+        Lighting.ColorShift_Top = Color3.new(1, 1, 1)
+      else
+        Lighting.Ambient = Color3.fromHex("#000000")
+        Lighting.ColorShift_Bottom = Color3.fromHex("#000000")
+        Lighting.ColorShift_Top = Color3.fromHex("#000000")
+      end
+    end)
+  end
 })
 
 MainTab:CreateToggle({
-    Name = "Global Shadows",
-    CurrentValue = lightingSettings.GlobalShadows,
-    Callback = function(Value)
-        lightingSettings.GlobalShadows = Value
-        applyLightingSettings()
-    end,
+    Name = "Infinite Stamina",
+    CurrentValue = false,
+    Callback = function(value)
+        local OldNameCall
+        OldNameCall = hookmetamethod(game, "__namecall", function (...)
+            local Args = {...}
+            local self = Args[1]
+            local Method = getnamecallmethod()
+            if Method == "FireServer" and tostring(self) == "LowerStamina" and value then
+                return task.wait(9e9)
+            end
+            return OldNameCall(...)
+        end)
+    end
+})
+
+MainTab:CreateToggle({
+    Name = "No Fall Damage",
+    CurrentValue = false,
+    Callback = function(value)
+        local oldNameCall
+        oldNameCall = hookmetamethod(game, "__namecall", function (...
+            local args = {...}
+            local self = args[1]
+            if getnamecallmethod() == "FireServer" and tostring(self) == "DamageSelf" and value then
+                return
+            end
+            return oldNameCall(...)
+        end)
+    end
 })
 
 PlayerTab:CreateToggle({
