@@ -10,14 +10,21 @@ local Window = Rayfield:CreateWindow({
   Name = "The Wild West 4.0",
   LoadingTitle = "Loading...",
   LoadingSubtitle = "By Thanawat",
+  ToggleKey = Enum.KeyCode.RightControl,  
 
-  ConfigurationSaving = { Enabled = false },
+  DisableRayfieldPrompts = false,
+  DisableBuildWarnings = false,
+
+  ConfigurationSaving = { 
+    Enabled = true,
+    FolderName = "The Wild West",
+    FileName = "config"
+  },
   Discord = { Enabled = false },
   KeySystem = false
 })
 
 local MainTab = Window:CreateTab("Main", 4483362458)
-local Section = MainTab:CreateSection("Main")
 local PlayerTab = Window:CreateTab("PVP", 4483362458)
 local FarmTab = Window:CreateTab("Farm", 4483362458)
 
@@ -32,6 +39,7 @@ local animalESPColor = Color3.fromRGB(255, 128, 128)
 
 local Lighting = game:GetService("Lighting")
 
+MainTab:CreateSection("Settings Main")
 MainTab:CreateToggle({
   Name = "Fullbright",
   CurrentValue = false,
@@ -45,17 +53,6 @@ MainTab:CreateToggle({
       Lighting.ColorShift_Bottom = Color3.new(0, 0, 0)
       Lighting.ColorShift_Top = Color3.new(0, 0, 0)
     end
-    Lighting.Changed:Connect(function()
-      if value then
-        Lighting.Ambient = Color3.new(1, 1, 1)
-        Lighting.ColorShift_Bottom = Color3.new(1, 1, 1)
-        Lighting.ColorShift_Top = Color3.new(1, 1, 1)
-      else
-        Lighting.Ambient = Color3.fromHex("#000000")
-        Lighting.ColorShift_Bottom = Color3.fromHex("#000000")
-        Lighting.ColorShift_Top = Color3.fromHex("#000000")
-      end
-    end)
   end
 })
 
@@ -106,6 +103,7 @@ MainTab:CreateToggle({
   end
 })
 
+PlayerTab:CreateSection("Settings PVP")
 PlayerTab:CreateToggle({
   Name = "Fast reload",
   CurrentValue = false,
@@ -113,16 +111,16 @@ PlayerTab:CreateToggle({
     for i, v in pairs(getgc(true)) do
         if type(v) == "table" and rawget(v, "BaseRecoil")  then
           if Value then
-            v.ReloadSpeed = 1000
-            v.LoadSpeed = 1000
-            v.LoadEndSpeed = 1000
+            v.ReloadSpeed = 500
+            v.LoadSpeed = 500
+            v.LoadEndSpeed = 500
           end
         end
     end
   end,
 })
 
-
+PlayerTab:CreateSection("Settings Player")
 PlayerTab:CreateToggle({
   Name = "ESP Players",
   CurrentValue = false,
@@ -139,6 +137,7 @@ PlayerTab:CreateColorPicker({
   end,
 })
 
+FarmTab:CreateSection("Settings Animals")
 FarmTab:CreateToggle({
   Name = "ESP Animals",
   CurrentValue = false,
